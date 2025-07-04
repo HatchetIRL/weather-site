@@ -8,13 +8,13 @@ pipeline {
   stages {
     stage('Install Dependencies') {
       steps {
-        sh 'npm install'
+        bat 'npm install'
       }
     }
 
     stage('Deploy to Netlify') {
       steps {
-        sh '''
+        bat '''
           npx netlify deploy --prod --dir=public --auth=$NETLIFY_AUTH_TOKEN --site=jimweather
         '''
       }
