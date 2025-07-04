@@ -9,9 +9,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const USERNAME = process.env.USERNAME;
 const PASSWORD = process.env.PASSWORD;
-const API_KEY = process.env.API_KEY;
+//const API_KEY = process.env.API_KEY;
 
-//const API_KEY = '4ac3ad01f2d5af00d19ded180194ce33';  // hardcoded test
+const API_KEY = '4ac3ad01f2d5af00d19ded180194ce33';  // hardcoded test
 
 //const url = `https://api.openweathermap.org/data/2.5/weather?q=Galway,IE&appid=${API_KEY}&units=metric`;
 
