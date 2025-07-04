@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Galway League 2025 Standings</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      background-color: #222;
+      color: #fff;
+      padding: 20px 0;
+      margin: 0;
+    }
+    .logo-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+      background-color: #000;
+      flex-wrap: wrap;
+    }
+    .logo-container img {
+      height: 70px;
+      width: auto;
+      margin: 0 10px;
+      max-width: 30%;
+    }
+    .logo-container img[src="GBCC.png"] {
+      max-width: 15%;
+    }
+    iframe {
+      border: none;
+      width: 100%;
+      height: 90vh;
+    }
+    #logoutBtn {
+      margin: 20px;
+      padding: 10px 20px;
+      background-color: #222;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #logoutBtn:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <img src="GBCC.png" alt="Galway Bay Cycling Club Logo" />
+    <img src="Tuam CC.jpg" alt="Tuam Cycling Club Logo" />
+    <img src="7SPrings.jpg" alt="Seven Springs Cycling Club Logo" />
+  </div>
+  <h1>Galway Summer League 2025 - Latest Standings</h1>
+  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vS2Bi0VWUtBxL7yQ27ctm5CQlky2rRAlZzxhKI0M0G-oDUnHnaA-fdQjmEdRF5wbbycP5bJHWL_-POp/pubhtml"></iframe>
+  <button id="logoutBtn">Logout</button>
+
+  <script>
+    // A very simple "logout" by going back to login page
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

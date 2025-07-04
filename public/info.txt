@@ -1,0 +1,9 @@
+https://bit.ly/SpringLeague25
+
+https://galwayspringleague25.netlify.app/
+
+
+
+All you have to do is update the scores per round, the sheets will auto sort and the results in the browser link below will be automatically updated too.
+
+https://summerleague25.netlify.app/
