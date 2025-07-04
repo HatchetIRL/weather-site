@@ -14,9 +14,9 @@ pipeline {
 
     stage('Deploy to Netlify') {
       steps {
-        bat '''
-          npx netlify deploy --prod --dir=public --auth=$NETLIFY_AUTH_TOKEN --site=jimweather
-        '''
+        bat """
+          npx netlify deploy --prod --dir=public --auth=%NETLIFY_AUTH_TOKEN% --site=jimweather
+        """
       }
     }
   }
