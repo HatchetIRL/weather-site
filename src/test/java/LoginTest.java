@@ -54,7 +54,7 @@ public class LoginTest {
 
     @Test
     void testLoginPageLoads() {
-        String loginUrl = "https://jimweather.netlify.app/login";
+        String loginUrl = "https://jimweather.netlify.app/login.html";
         System.out.println("🌐 Navigating to login page: " + loginUrl);
         driver.get(loginUrl);
 
