@@ -20,7 +20,7 @@ pipeline {
 
     stage('Run Tests') {
       steps {
-        bat 'mvn test'
+        bat 'mvn clean test'
       }
     }
 
