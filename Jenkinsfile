@@ -27,9 +27,10 @@ pipeline {
 
     stage('Run Tests') {
       steps {
-        bat 'mvn test -DsiteUrl=http://localhost:5000'
+        bat 'mvn test -DsiteUrl=http://localhost:5000 -Dheadless=true'
       }
     }
+
 
     stage('Deploy to Netlify') {
       when {

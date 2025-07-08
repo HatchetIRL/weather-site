@@ -52,6 +52,7 @@ public class LoginTest {
     private WebDriver driver;
     //private final String loginUrl = "https://jimweather.netlify.app/login.html";
     String loginUrl = System.getProperty("siteUrl", "https://jimweather.netlify.app/login.html");
+    boolean isHeadless = Boolean.parseBoolean(System.getProperty("headless", "false"));
 
     @BeforeEach
     void setUp() {
