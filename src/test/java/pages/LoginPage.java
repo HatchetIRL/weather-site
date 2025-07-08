@@ -101,20 +101,32 @@
 
 package pages;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class LoginPage extends BasePage {
 
-    private By usernameInput = By.id("username");
-    private By passwordInput = By.id("password");
-    private By loginButton   = By.xpath("//button[text()='Login']");
-    private By standingsTitle = By.xpath("//h1");
+    @FindBy(id = "username")
+    private WebElement usernameInput;
+
+    @FindBy(id = "password")
+    private WebElement passwordInput;
+
+    @FindBy(xpath = "//button[text()='Login']")
+    private WebElement loginButton;
+
+    @FindBy(xpath = "//h1")
+    private WebElement standingsTitle;
+
+    @FindBy(id = "error")
+    private WebElement loginError;
 
     public LoginPage(WebDriver driver) {
         super(driver);
+        PageFactory.initElements(driver, this);
     }
 
     public boolean isAtLoginPage() {
@@ -122,20 +134,26 @@ public class LoginPage extends BasePage {
     }
 
     public boolean isLoginFormPresent() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(usernameInput)).isDisplayed()
-                && wait.until(ExpectedConditions.visibilityOfElementLocated(passwordInput)).isDisplayed()
-                && wait.until(ExpectedConditions.visibilityOfElementLocated(loginButton)).isDisplayed();
+        wait.until(ExpectedConditions.visibilityOf(usernameInput));
+        wait.until(ExpectedConditions.visibilityOf(passwordInput));
+        wait.until(ExpectedConditions.visibilityOf(loginButton));
+        return usernameInput.isDisplayed() && passwordInput.isDisplayed() && loginButton.isDisplayed();
     }
 
     public void loginAs(String username, String password) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(usernameInput)).sendKeys(username);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(passwordInput)).sendKeys(password);
-        driver.findElement(loginButton).click();
+        usernameInput.sendKeys(username);
+        passwordInput.sendKeys(password);
+        loginButton.click();
     }
 
     public boolean isLoginSuccessful() {
-        WebElement title = wait.until(ExpectedConditions.visibilityOfElementLocated(standingsTitle));
-        return title.getText().toLowerCase().contains("galway");
+        wait.until(ExpectedConditions.visibilityOf(standingsTitle));
+        return standingsTitle.getText().toLowerCase().contains("galway");
+    }
+
+    public boolean isLoginFailed() {
+        WebElement title = wait.until(ExpectedConditions.visibilityOf(loginError));
+        return title.getText().toLowerCase().contains("invalid login ya ape");
     }
 }
 
