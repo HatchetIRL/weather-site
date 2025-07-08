@@ -50,7 +50,8 @@ import java.time.Duration;
 public class LoginTest {
 
     private WebDriver driver;
-    private final String loginUrl = "https://jimweather.netlify.app/login.html";
+    //private final String loginUrl = "https://jimweather.netlify.app/login.html";
+    String loginUrl = System.getProperty("siteUrl", "http://localhost:5000");
 
     @BeforeEach
     void setUp() {
@@ -87,10 +88,10 @@ public class LoginTest {
 
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        System.out.println("Check that the username textbox is present");
+        System.out.println("🔍 Check that the username textbox is present");
         WebElement txtUserName = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")));
 
-        System.out.println("Check that the password textbox is present");
+        System.out.println("🔍 Check that the password textbox is present");
         WebElement txtPassword = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
 
         WebElement btnLogin = driver.findElement(By.xpath("//button[text()=\"Login\"]"));

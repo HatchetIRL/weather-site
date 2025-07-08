@@ -12,22 +12,35 @@ pipeline {
       }
     }
 
+    stage('Build Frontend') {
+      steps {
+        bat 'npm run build'
+      }
+    }
+
     stage('Build WebDriver Tests') {
       steps {
         bat 'mvn clean compile'
       }
     }
 
+    stage('Start Local Server') {
+      steps {
+        // Optional: a better way to run this in the background may be needed
+        bat 'start /B npx serve public -l 5000'
+        bat 'timeout /t 5'  // wait a few seconds for server to start
+      }
+    }
+
     stage('Run Tests') {
       steps {
-        bat 'mvn clean test'
+        bat 'mvn test -DsiteUrl=http://localhost:5000'
       }
     }
 
     stage('Deploy to Netlify') {
       when {
         expression {
-          // Only deploy if tests succeeded
           currentBuild.result == null || currentBuild.result == 'SUCCESS'
         }
       }
