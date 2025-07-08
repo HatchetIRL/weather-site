@@ -51,7 +51,7 @@ public class LoginTest {
 
     private WebDriver driver;
     //private final String loginUrl = "https://jimweather.netlify.app/login.html";
-    String loginUrl = System.getProperty("siteUrl", "http://localhost:5000");
+    String loginUrl = System.getProperty("siteUrl", "https://jimweather.netlify.app/login.html");
 
     @BeforeEach
     void setUp() {
