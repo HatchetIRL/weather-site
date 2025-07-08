@@ -21,7 +21,7 @@ pipeline {
     stage('Start Local Server') {
       steps {
         bat 'start /B npx serve public -l 5000'
-        bat 'timeout /t 5'
+        bat 'ping 127.0.0.1 -n 6 > nul'  // replaces timeout
       }
     }
 
