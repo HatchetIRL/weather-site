@@ -105,13 +105,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-
-public class LoginPage {
-    private WebDriver driver;
-    private WebDriverWait wait;
+public class LoginPage extends BasePage {
 
     private By usernameInput = By.id("username");
     private By passwordInput = By.id("password");
@@ -119,13 +114,11 @@ public class LoginPage {
     private By standingsTitle = By.xpath("//h1");
 
     public LoginPage(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        super(driver);
     }
 
     public boolean isAtLoginPage() {
-        String title = driver.getTitle();
-        return title.toLowerCase().contains("login");
+        return getPageTitle().toLowerCase().contains("login");
     }
 
     public boolean isLoginFormPresent() {
@@ -145,3 +138,4 @@ public class LoginPage {
         return title.getText().toLowerCase().contains("galway");
     }
 }
+
