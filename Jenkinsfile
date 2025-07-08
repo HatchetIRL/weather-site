@@ -20,9 +20,8 @@ pipeline {
 
     stage('Start Local Server') {
       steps {
-        // Optional: a better way to run this in the background may be needed
         bat 'start /B npx serve public -l 5000'
-        bat 'timeout /t 5'  // wait a few seconds for server to start
+        bat 'timeout /t 5'
       }
     }
 
