@@ -13,15 +13,17 @@ public class StandingsTest extends BaseTest{
 
     @Test
     public void testJamesAppearsInStandings() {
-        // Step 1: Navigate to login page
-        driver.get(loginUrl);
-        LoginPage loginPage = new LoginPage(driver);
+//        // Step 1: Navigate to login page
+//        driver.get(loginUrl);
+//        LoginPage loginPage = new LoginPage(driver);
+//
+//        // Step 2: Perform valid login
+//        loginPage.loginAs(user, pass);
+//
+//        // Step 3: Instantiate StandingsPage
+//        StandingsPage standingsPage = new StandingsPage(driver);
 
-        // Step 2: Perform valid login
-        loginPage.loginAs(user, pass);
-
-        // Step 3: Instantiate StandingsPage
-        StandingsPage standingsPage = new StandingsPage(driver);
+        StandingsPage standingsPage = loginAndGoToStandingsPage();
 
         // Step 4: Validate we are on standings page
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");

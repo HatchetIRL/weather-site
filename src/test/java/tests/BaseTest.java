@@ -42,6 +42,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import pages.LoginPage;
+import pages.StandingsPage;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class BaseTest {
     protected WebDriver driver;
@@ -65,6 +69,19 @@ public abstract class BaseTest {
         if (driver != null) {
             driver.quit();
         }
+    }
+
+    protected StandingsPage loginAndGoToStandingsPage() {
+        String loginUrl = System.getProperty("siteUrl", "https://jimweather.netlify.app/login.html");
+        String user = System.getProperty("siteUser", "user");
+        String pass = System.getProperty("sitePass", "pass");
+
+        driver.get(loginUrl);
+        LoginPage loginPage = new LoginPage(driver);
+        assertTrue(loginPage.isLoginFormPresent(), "❌ Login form is not present!");
+        loginPage.loginAs(user, pass);
+
+        return new StandingsPage(driver);
     }
 }
 
