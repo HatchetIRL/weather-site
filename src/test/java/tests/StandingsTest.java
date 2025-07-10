@@ -30,10 +30,10 @@ public class StandingsTest extends BaseTest{
 
         // Step 5: Get and print James's score
         String score = standingsPage.JamesScore();
-        System.out.println("📊 James's score is: " + score);
+        System.out.println("📊 ######### James's score is: " + score);
 
         // Step 6 (Optional): Assert the score is not empty
-        assertTrue(!score.isEmpty(), "❌ James's score is empty.");
+        assertTrue(!score.isEmpty(), "❌  James's score is empty.");
     }
 
 
@@ -57,5 +57,7 @@ public class StandingsTest extends BaseTest{
 
         // Step 6: Verify logout success and we're back at the login page
         assertTrue(loginPage.isAtLoginPage(), "❌ Not on the Login page.");
+
+        System.out.println("✅ ############## Logout verified successfully.");
     }
 }
