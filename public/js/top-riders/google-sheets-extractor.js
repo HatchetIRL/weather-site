@@ -75,29 +75,33 @@ class GoogleSheetsExtractor {
      */
     convertToCsvUrl(sheetsUrl) {
         try {
-            // Extract spreadsheet ID from various Google Sheets URL formats
-            const patterns = [
-                /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/,
-                /\/d\/([a-zA-Z0-9-_]+)/
-            ];
-
+            // Handle different Google Sheets URL formats
             let spreadsheetId = null;
             
-            for (const pattern of patterns) {
-                const match = sheetsUrl.match(pattern);
-                if (match) {
-                    spreadsheetId = match[1];
-                    break;
-                }
+            // Pattern for pubhtml URLs: /d/e/2PACX-...../pubhtml
+            const pubhtmlMatch = sheetsUrl.match(/\/d\/e\/([a-zA-Z0-9-_]+)\/pubhtml/);
+            if (pubhtmlMatch) {
+                spreadsheetId = pubhtmlMatch[1];
+                // For published sheets, use the export URL with the full published ID
+                return `https://docs.google.com/spreadsheets/d/e/${spreadsheetId}/pub?output=csv`;
+            }
+            
+            // Pattern for regular spreadsheet URLs: /d/spreadsheet_id/
+            const regularMatch = sheetsUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (regularMatch) {
+                spreadsheetId = regularMatch[1];
+                return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
             }
 
-            if (!spreadsheetId) {
-                console.error('Could not extract spreadsheet ID from URL:', sheetsUrl);
-                return null;
+            // Pattern for short URLs: /d/spreadsheet_id
+            const shortMatch = sheetsUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (shortMatch) {
+                spreadsheetId = shortMatch[1];
+                return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
             }
 
-            // Return CSV export URL
-            return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+            console.error('Could not extract spreadsheet ID from URL:', sheetsUrl);
+            return null;
         } catch (error) {
             console.error('Error converting to CSV URL:', error);
             return null;
