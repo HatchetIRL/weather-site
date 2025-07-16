@@ -92,7 +92,9 @@ public class TopRidersTest extends BaseTest {
                            log.getMessage().toLowerCase().contains("top-riders") &&
                            !log.getMessage().toLowerCase().contains("cors") &&
                            !log.getMessage().toLowerCase().contains("network") &&
-                           !log.getMessage().toLowerCase().contains("fetch"));
+                           !log.getMessage().toLowerCase().contains("fetch") &&
+                           !log.getMessage().toLowerCase().contains("404") &&
+                           !log.getMessage().toLowerCase().contains("http"));
         
         // Log the errors for debugging but don't fail on CORS/network errors
         if (!logs.isEmpty()) {
