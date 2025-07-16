@@ -123,6 +123,8 @@
   - Add fallback to cached data when network requests fail
   - _Requirements: 4.1, 4.2_
 
+
+
 - [ ] 6.2 Optimize performance for large datasets
   - Implement efficient data processing algorithms
   - Add debouncing for refresh operations
@@ -143,13 +145,17 @@
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
 - [ ] 8. Final integration and deployment preparation
-- [ ] 8.1 Update both public and views standings pages
+- [x] 8.1 Update both public and views standings pages
+
   - Ensure both public/standings.html and views/standings.html include the new feature
   - Verify consistent behavior across both page versions
   - Test logout functionality still works with new additions
   - _Requirements: 3.3, 3.4_
 
-- [ ] 8.2 Add accessibility features and final polish
+- [x] 8.2 Add accessibility features and final polish
+
+
+
   - Implement ARIA labels and screen reader support
   - Add keyboard navigation for interactive elements
   - Perform final cross-browser testing and bug fixes

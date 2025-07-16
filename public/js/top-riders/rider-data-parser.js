@@ -253,6 +253,9 @@ class RiderDataParser {
         for (let i = 0; i < headerRow.length; i++) {
             const header = headerRow[i].toLowerCase().trim();
 
+            // Skip empty headers (common in Google Sheets exports)
+            if (!header) continue;
+
             // Handle the specific format of this sheet
             if (header === 'first name') {
                 indices.firstName = i;
@@ -273,10 +276,17 @@ class RiderDataParser {
             }
         }
 
-        // For this format, we need firstName, lastName, and points
-        // OR we need a single name column and points
+        // For this format, we need:
+        // 1. firstName + lastName + points, OR
+        // 2. just lastName + points (for Dev League format), OR  
+        // 3. single name column + points
         indices.valid = (indices.firstName >= 0 && indices.lastName >= 0 && indices.points >= 0) ||
+            (indices.lastName >= 0 && indices.points >= 0) ||
             (indices.name >= 0 && indices.points >= 0);
+            
+        console.log('Column analysis for header:', headerRow);
+        console.log('Found indices:', indices);
+        console.log('Valid structure:', indices.valid);
 
         return indices;
     }
@@ -297,6 +307,9 @@ class RiderDataParser {
                 const firstName = row[columnIndices.firstName]?.trim() || '';
                 const lastName = row[columnIndices.lastName]?.trim() || '';
                 name = `${firstName} ${lastName}`.trim();
+            } else if (columnIndices.lastName >= 0) {
+                // Handle case where there's only lastName column (Dev League format)
+                name = row[columnIndices.lastName]?.trim() || '';
             } else if (columnIndices.name >= 0) {
                 name = row[columnIndices.name]?.trim() || '';
             }

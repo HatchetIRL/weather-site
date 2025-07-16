@@ -11,7 +11,7 @@ class RankingEngine {
         // Configuration for ranking logic
         this.config = {
             minValidPoints: 0,
-            minValidPosition: 1,
+            minValidPosition: 0, // Allow position 0 for riders without explicit positions
             maxValidPosition: 1000
         };
     }
@@ -29,10 +29,10 @@ class RankingEngine {
 
         // Filter valid entries first
         const validRiders = this.filterValidEntries(riders);
-        
+
         // Sort by points (primary) and position (secondary)
         const sortedRiders = this.sortByPoints(validRiders);
-        
+
         // Return top N riders
         return sortedRiders.slice(0, Math.max(0, count));
     }
@@ -113,33 +113,42 @@ class RankingEngine {
      */
     isValidRider(rider) {
         if (!rider || typeof rider !== 'object') {
+            console.log('Invalid rider: not an object', rider);
             return false;
         }
 
         // Check required fields
         if (!rider.name || typeof rider.name !== 'string' || rider.name.trim().length === 0) {
+            console.log('Invalid rider: bad name', rider);
             return false;
         }
 
         if (typeof rider.points !== 'number' || isNaN(rider.points)) {
+            console.log('Invalid rider: bad points', rider);
             return false;
         }
 
-        if (typeof rider.position !== 'number' || isNaN(rider.position)) {
+        // Position is optional - many sheets don't have explicit position columns
+        if (rider.position !== undefined && (typeof rider.position !== 'number' || isNaN(rider.position))) {
+            console.log('Invalid rider: bad position', rider);
             return false;
         }
 
         if (!rider.category || typeof rider.category !== 'string') {
+            console.log('Invalid rider: bad category', rider);
             return false;
         }
 
         // Check value ranges
         if (rider.points < this.config.minValidPoints) {
+            console.log('Invalid rider: points too low', rider);
             return false;
         }
 
-        if (rider.position < this.config.minValidPosition || 
-            rider.position > this.config.maxValidPosition) {
+        // Only check position range if position is defined
+        if (rider.position !== undefined &&
+            (rider.position < this.config.minValidPosition || rider.position > this.config.maxValidPosition)) {
+            console.log('Invalid rider: position out of range', rider);
             return false;
         }
 
@@ -222,13 +231,13 @@ class RankingEngine {
      */
     getTopRidersPositionRange(riders, count) {
         const topRiders = this.getTopRiders(riders, count);
-        
+
         if (topRiders.length === 0) {
             return { min: 0, max: 0, range: 0 };
         }
 
         const positions = topRiders.map(r => r.position).filter(p => p > 0);
-        
+
         if (positions.length === 0) {
             return { min: 0, max: 0, range: 0 };
         }
