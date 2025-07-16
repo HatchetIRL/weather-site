@@ -229,6 +229,7 @@ class GoogleSheetsExtractor {
      */
     async fetchAllSheets(spreadsheetId) {
         const sheets = [];
+        console.log('Fetching sheets for spreadsheet ID:', spreadsheetId);
         
         // Define the 4 sheets we need to fetch
         const sheetConfigs = [
@@ -241,10 +242,13 @@ class GoogleSheetsExtractor {
         // Fetch each sheet individually
         for (const config of sheetConfigs) {
             try {
+                console.log(`Fetching ${config.name} sheet...`);
                 // Build CSV URL for specific sheet using gid parameter
                 const csvUrl = `https://docs.google.com/spreadsheets/d/e/${spreadsheetId}/pub?output=csv&gid=${config.gid}`;
+                console.log('CSV URL:', csvUrl);
                 
                 const response = await this.fetchWithTimeout(csvUrl);
+                console.log(`${config.name} response status:`, response.status);
                 
                 if (!response.ok) {
                     console.warn(`Failed to fetch ${config.name}: HTTP ${response.status}`);
@@ -252,18 +256,21 @@ class GoogleSheetsExtractor {
                 }
 
                 const csvText = await response.text();
+                console.log(`${config.name} CSV data (first 200 chars):`, csvText.substring(0, 200));
                 const parsedData = this.parseCSVText(csvText);
+                console.log(`${config.name} parsed rows:`, parsedData.length);
                 
                 sheets.push({
                     name: config.name,
                     data: parsedData
                 });
             } catch (error) {
-                console.warn(`Error fetching ${config.name}:`, error);
+                console.error(`Error fetching ${config.name}:`, error);
                 // Continue with other sheets even if one fails
             }
         }
 
+        console.log('Total sheets fetched:', sheets.length);
         if (sheets.length === 0) {
             throw new Error('Failed to fetch any sheet data');
         }

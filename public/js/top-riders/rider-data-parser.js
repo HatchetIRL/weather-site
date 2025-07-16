@@ -206,17 +206,27 @@ class RiderDataParser {
 
         const riders = [];
         
-        // Parse data rows (skip header)
+        // Pre-allocate array for better performance with large datasets
+        const estimatedSize = Math.max(0, sectionData.length - 1);
+        riders.length = 0; // Ensure clean start
+        
+        // Parse data rows (skip header) - optimized for large datasets
         for (let i = 1; i < sectionData.length; i++) {
             const row = sectionData[i];
             
-            if (this.isEmptyRow(row) || this.isNewSection(row)) {
+            // Quick empty/section check without function calls for performance
+            if (!row || row.length === 0 || row.every(cell => !cell || cell.trim() === '')) {
                 continue;
             }
 
             const rider = this.parseRiderRow(row, headerInfo, category);
             if (rider && this.validateRider(rider)) {
                 riders.push(rider);
+            }
+            
+            // Yield control periodically for very large datasets
+            if (i % 1000 === 0 && sectionData.length > 5000) {
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
         }
 

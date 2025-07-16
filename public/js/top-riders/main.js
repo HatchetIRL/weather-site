@@ -9,6 +9,7 @@ import { RiderDataParser } from './rider-data-parser.js';
 import { RankingEngine } from './ranking-engine.js';
 import { TopRidersRenderer } from './top-riders-renderer.js';
 import { errorHandler } from './error-handler.js';
+import { CacheManager } from './cache-manager.js';
 import { DEFAULT_CONFIG, STORAGE_KEYS, ERROR_MESSAGES } from './constants.js';
 
 /**
@@ -25,6 +26,7 @@ class TopRidersApp {
             enableCaching: config.enableCaching !== false,
             cacheExpiry: config.cacheExpiry || DEFAULT_CONFIG.CACHE_EXPIRY,
             containerSelector: config.containerSelector || '#top-riders-container',
+            debounceDelay: config.debounceDelay || 1000, // 1 second debounce
             ...config
         };
         
@@ -33,11 +35,19 @@ class TopRidersApp {
         this.parser = new RiderDataParser();
         this.rankingEngine = new RankingEngine();
         this.renderer = new TopRidersRenderer();
+        this.cacheManager = new CacheManager({
+            cacheExpiry: this.config.cacheExpiry,
+            debugMode: this.config.debugMode || false
+        });
         
         this.initialized = false;
         this.refreshTimer = null;
         this.containerElement = null;
         this.currentData = null;
+        
+        // Performance optimization: debounced refresh
+        this.debouncedRefresh = this.debounce(this.loadData.bind(this), this.config.debounceDelay);
+        this.isRefreshing = false;
     }
 
     /**
@@ -62,6 +72,9 @@ class TopRidersApp {
 
             // Set up event listeners
             this.setupEventListeners();
+            
+            // Set up cache management
+            this.setupCacheManagement();
             
             // Load initial data
             await this.loadData();
@@ -137,17 +150,28 @@ class TopRidersApp {
      */
     async fetchFreshData() {
         try {
+            console.log('Starting to fetch fresh data from:', this.config.googleSheetsUrl);
+            
             // Extract raw data from Google Sheets
             const rawData = await this.extractor.extractSheetData(this.config.googleSheetsUrl);
+            console.log('Raw data extracted:', rawData);
             
             if (!rawData || !this.parser.validateDataStructure(rawData)) {
+                console.error('Invalid data structure received:', rawData);
                 throw new Error('Invalid data structure received');
             }
 
+            console.log('Data structure is valid, parsing rider data...');
+
             // Parse the data into rider objects
             const mainLeague = this.parser.parseMainLeague(rawData);
+            console.log('Main League riders parsed:', mainLeague.length, mainLeague);
+            
             const developmentLeague = this.parser.parseDevelopmentLeague(rawData);
+            console.log('Development League riders parsed:', developmentLeague.length, developmentLeague);
+            
             const primeTables = this.parser.parsePrimeTables(rawData);
+            console.log('Prime tables parsed:', primeTables);
 
             // Get top riders using ranking engine
             const topRidersData = {
@@ -158,6 +182,7 @@ class TopRidersApp {
                 lastUpdated: new Date()
             };
 
+            console.log('Final top riders data:', topRidersData);
             return topRidersData;
         } catch (error) {
             console.error('Error fetching fresh data:', error);
@@ -233,49 +258,69 @@ class TopRidersApp {
     }
 
     /**
-     * Cache data to localStorage
-     * @param {TopRidersData} data - Data to cache
+     * Set up cache management features
      */
-    cacheData(data) {
-        try {
-            const cacheObject = {
-                data: data,
-                timestamp: Date.now()
-            };
-            localStorage.setItem(STORAGE_KEYS.CACHED_DATA, JSON.stringify(cacheObject));
-        } catch (error) {
-            console.warn('Failed to cache data:', error);
+    setupCacheManagement() {
+        if (!this.config.enableCaching) return;
+
+        // Set up automatic cache cleanup
+        this.cacheManager.setupAutoCleanup();
+
+        // Set up offline/online handling
+        this.cacheManager.setupOfflineHandling(
+            () => {
+                // When going offline, show a message if we have cached data
+                const cachedData = this.getCachedData();
+                if (cachedData) {
+                    console.log('Offline mode: Using cached data');
+                    // Could show a notification to user about offline mode
+                }
+            },
+            () => {
+                // When coming online, refresh data
+                console.log('Online mode: Refreshing data');
+                setTimeout(() => {
+                    this.refreshData();
+                }, 2000); // Wait a bit for connection to stabilize
+            }
+        );
+
+        // Log cache statistics in debug mode
+        if (this.config.debugMode) {
+            const stats = this.cacheManager.getStats();
+            console.log('Cache statistics:', stats);
         }
     }
 
     /**
-     * Get cached data from localStorage
+     * Cache data using enhanced cache manager
+     * @param {TopRidersData} data - Data to cache
+     */
+    cacheData(data) {
+        if (!this.config.enableCaching) return;
+        
+        this.cacheManager.set(STORAGE_KEYS.CACHED_DATA, data, {
+            version: '1.0',
+            metadata: {
+                sheetsUrl: this.config.googleSheetsUrl,
+                ridersCount: {
+                    mainLeague: data.mainLeague?.length || 0,
+                    developmentLeague: data.developmentLeague?.length || 0,
+                    prime1: data.prime1?.length || 0,
+                    prime2: data.prime2?.length || 0
+                }
+            }
+        });
+    }
+
+    /**
+     * Get cached data using enhanced cache manager
      * @returns {TopRidersData|null}
      */
     getCachedData() {
-        try {
-            const cached = localStorage.getItem(STORAGE_KEYS.CACHED_DATA);
-            if (!cached) return null;
-
-            const cacheObject = JSON.parse(cached);
-            const age = Date.now() - cacheObject.timestamp;
-
-            // Check if cache is still valid
-            if (age > this.config.cacheExpiry) {
-                localStorage.removeItem(STORAGE_KEYS.CACHED_DATA);
-                return null;
-            }
-
-            // Convert lastUpdated back to Date object
-            if (cacheObject.data.lastUpdated) {
-                cacheObject.data.lastUpdated = new Date(cacheObject.data.lastUpdated);
-            }
-
-            return cacheObject.data;
-        } catch (error) {
-            console.warn('Failed to get cached data:', error);
-            return null;
-        }
+        if (!this.config.enableCaching) return null;
+        
+        return this.cacheManager.get(STORAGE_KEYS.CACHED_DATA);
     }
 
     /**
@@ -304,15 +349,6 @@ class TopRidersApp {
     }
 
     /**
-     * Manually refresh data
-     * @returns {Promise<void>}
-     */
-    async refreshData() {
-        console.log('Refreshing top riders data...');
-        await this.loadData();
-    }
-
-    /**
      * Get current data
      * @returns {TopRidersData|null}
      */
@@ -333,6 +369,43 @@ class TopRidersApp {
             if (this.config.refreshInterval > 0) {
                 this.startAutoRefresh();
             }
+        }
+    }
+
+    /**
+     * Debounce function to limit rapid successive calls
+     * @param {Function} func - Function to debounce
+     * @param {number} wait - Wait time in milliseconds
+     * @returns {Function} Debounced function
+     */
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    /**
+     * Optimized refresh with debouncing and refresh state management
+     * @returns {Promise<void>}
+     */
+    async refreshData() {
+        if (this.isRefreshing) {
+            console.log('Refresh already in progress, skipping...');
+            return;
+        }
+
+        this.isRefreshing = true;
+        try {
+            console.log('Refreshing top riders data...');
+            await this.loadData();
+        } finally {
+            this.isRefreshing = false;
         }
     }
 
