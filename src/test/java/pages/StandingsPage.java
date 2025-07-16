@@ -49,5 +49,69 @@ public class StandingsPage extends BasePage{
         btnLogOut.click();
     }
 
+    // Top Riders functionality methods
+    public boolean isTopRidersContainerPresent() {
+        try {
+            WebElement container = driver.findElement(By.id("top-riders-container"));
+            return container.isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isTopRidersContentLoaded() {
+        try {
+            WebElement container = driver.findElement(By.id("top-riders-container"));
+            return !container.getText().trim().isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean hasTopRidersError() {
+        try {
+            WebElement errorElement = driver.findElement(By.className("top-riders-error"));
+            return errorElement.isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean hasTopRidersLoading() {
+        try {
+            WebElement loadingElement = driver.findElement(By.className("top-riders-loading"));
+            return loadingElement.isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public int getTopRidersSectionCount() {
+        try {
+            return driver.findElements(By.className("top-riders-section")).size();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public boolean hasTopRidersHeader() {
+        try {
+            WebElement header = driver.findElement(By.className("top-riders-header"));
+            return header.isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void clickTopRidersRefresh() {
+        try {
+            WebElement refreshBtn = wait.until(ExpectedConditions.elementToBeClickable(
+                By.className("top-riders-refresh-btn")));
+            refreshBtn.click();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not click Top Riders refresh button", e);
+        }
+    }
+
 
 }

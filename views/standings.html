@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Galway League 2025 Standings</title>
+  <link rel="stylesheet" href="css/top-riders.css">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -51,6 +52,30 @@
     <img src="7SPrings.jpg" alt="Seven Springs Cycling Club Logo">
   </div>
   <h1>Galway Summer League 2025 - Latest Standings</h1>
+  
+  <!-- Top Riders Summary Section -->
+  <div id="top-riders-container"></div>
+  
   <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vS2Bi0VWUtBxL7yQ27ctm5CQlky2rRAlZzxhKI0M0G-oDUnHnaA-fdQjmEdRF5wbbycP5bJHWL_-POp/pubhtml"></iframe>
+
+  <script type="module">
+    import { TopRidersApp } from './js/top-riders/main.js';
+
+    // Initialize Top Riders feature when page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const topRidersApp = new TopRidersApp({
+          googleSheetsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2Bi0VWUtBxL7yQ27ctm5CQlky2rRAlZzxhKI0M0G-oDUnHnaA-fdQjmEdRF5wbbycP5bJHWL_-POp/pubhtml',
+          containerSelector: '#top-riders-container',
+          refreshInterval: 300000, // 5 minutes
+          enableCaching: true
+        });
+
+        await topRidersApp.initialize();
+      } catch (error) {
+        console.error('Failed to initialize Top Riders:', error);
+      }
+    });
+  </script>
 </body>
 </html>
