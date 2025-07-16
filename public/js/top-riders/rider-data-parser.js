@@ -27,17 +27,17 @@ class RiderDataParser {
     parseMainLeague(rawData) {
         try {
             // Find the Main League sheet
-            const mainLeagueSheet = rawData.sheets.find(sheet => 
+            const mainLeagueSheet = rawData.sheets.find(sheet =>
                 sheet.name === 'Main League' || sheet.name.toLowerCase().includes('main')
             );
-            
+
             if (!mainLeagueSheet || !mainLeagueSheet.data || mainLeagueSheet.data.length === 0) {
                 console.warn('No Main League sheet found');
                 return [];
             }
 
             const riders = this.parseRiderData(mainLeagueSheet.data, LEAGUE_CATEGORIES.MAIN_LEAGUE);
-            
+
             return riders;
         } catch (error) {
             console.error('Error parsing Main League data:', error);
@@ -53,17 +53,17 @@ class RiderDataParser {
     parseDevelopmentLeague(rawData) {
         try {
             // Find the Development League sheet
-            const devLeagueSheet = rawData.sheets.find(sheet => 
+            const devLeagueSheet = rawData.sheets.find(sheet =>
                 sheet.name === 'Dev League' || sheet.name.toLowerCase().includes('dev')
             );
-            
+
             if (!devLeagueSheet || !devLeagueSheet.data || devLeagueSheet.data.length === 0) {
                 console.warn('No Development League sheet found');
                 return [];
             }
 
             const riders = this.parseRiderData(devLeagueSheet.data, LEAGUE_CATEGORIES.DEVELOPMENT_LEAGUE);
-            
+
             return riders;
         } catch (error) {
             console.error('Error parsing Development League data:', error);
@@ -79,12 +79,12 @@ class RiderDataParser {
     parsePrimeTables(rawData) {
         try {
             // Find the ML Primes sheet (Prime 1)
-            const mlPrimesSheet = rawData.sheets.find(sheet => 
+            const mlPrimesSheet = rawData.sheets.find(sheet =>
                 sheet.name === 'ML Primes' || sheet.name.toLowerCase().includes('ml prime')
             );
-            
+
             // Find the DL Primes sheet (Prime 2)
-            const dlPrimesSheet = rawData.sheets.find(sheet => 
+            const dlPrimesSheet = rawData.sheets.find(sheet =>
                 sheet.name === 'DL Primes' || sheet.name.toLowerCase().includes('dl prime')
             );
 
@@ -139,7 +139,7 @@ class RiderDataParser {
         for (let i = 0; i < mainSheet.data.length; i++) {
             const row = mainSheet.data[i];
             const rowText = row.join(' ').toLowerCase();
-            
+
             for (const pattern of patterns) {
                 if (rowText.includes(pattern.toLowerCase())) {
                     // Found section header, extract data until next section or end
@@ -173,12 +173,12 @@ class RiderDataParser {
         // Extract table data
         while (i < sheetData.length) {
             const row = sheetData[i];
-            
+
             // Stop if we hit another section header or empty rows
             if (this.isNewSection(row) || this.isEmptyRow(row)) {
                 break;
             }
-            
+
             sectionData.push(row);
             i++;
         }
@@ -205,15 +205,15 @@ class RiderDataParser {
         }
 
         const riders = [];
-        
+
         // Pre-allocate array for better performance with large datasets
         const estimatedSize = Math.max(0, sectionData.length - 1);
         riders.length = 0; // Ensure clean start
-        
+
         // Parse data rows (skip header) - optimized for large datasets
         for (let i = 1; i < sectionData.length; i++) {
             const row = sectionData[i];
-            
+
             // Quick empty/section check without function calls for performance
             if (!row || row.length === 0 || row.every(cell => !cell || cell.trim() === '')) {
                 continue;
@@ -223,10 +223,11 @@ class RiderDataParser {
             if (rider && this.validateRider(rider)) {
                 riders.push(rider);
             }
-            
+
             // Yield control periodically for very large datasets
             if (i % 1000 === 0 && sectionData.length > 5000) {
-                await new Promise(resolve => setTimeout(resolve, 0));
+                // Use setTimeout to yield control without await in non-async function
+                setTimeout(() => { }, 0);
             }
         }
 
@@ -251,7 +252,7 @@ class RiderDataParser {
 
         for (let i = 0; i < headerRow.length; i++) {
             const header = headerRow[i].toLowerCase().trim();
-            
+
             // Handle the specific format of this sheet
             if (header === 'first name') {
                 indices.firstName = i;
@@ -275,8 +276,8 @@ class RiderDataParser {
         // For this format, we need firstName, lastName, and points
         // OR we need a single name column and points
         indices.valid = (indices.firstName >= 0 && indices.lastName >= 0 && indices.points >= 0) ||
-                       (indices.name >= 0 && indices.points >= 0);
-        
+            (indices.name >= 0 && indices.points >= 0);
+
         return indices;
     }
 
@@ -290,7 +291,7 @@ class RiderDataParser {
     parseRiderRow(row, columnIndices, category) {
         try {
             let name = '';
-            
+
             // Handle firstName + lastName format
             if (columnIndices.firstName >= 0 && columnIndices.lastName >= 0) {
                 const firstName = row[columnIndices.firstName]?.trim() || '';
@@ -299,18 +300,18 @@ class RiderDataParser {
             } else if (columnIndices.name >= 0) {
                 name = row[columnIndices.name]?.trim() || '';
             }
-            
+
             if (!name) {
                 return null;
             }
 
-            const position = columnIndices.position >= 0 ? 
+            const position = columnIndices.position >= 0 ?
                 parseInt(row[columnIndices.position]) || 0 : 0;
-            
-            const points = columnIndices.points >= 0 ? 
+
+            const points = columnIndices.points >= 0 ?
                 parseFloat(row[columnIndices.points]) || 0 : 0;
-            
-            const club = columnIndices.club >= 0 ? 
+
+            const club = columnIndices.club >= 0 ?
                 row[columnIndices.club]?.trim() : '';
 
             return {
@@ -338,7 +339,7 @@ class RiderDataParser {
 
         // Check if it's RawSheetData
         if (data.sheets && Array.isArray(data.sheets) && data.extractedAt) {
-            return data.sheets.every(sheet => 
+            return data.sheets.every(sheet =>
                 sheet.name && Array.isArray(sheet.data)
             );
         }
@@ -352,12 +353,12 @@ class RiderDataParser {
      * @returns {boolean} True if valid
      */
     validateRider(rider) {
-        return rider && 
-               typeof rider.name === 'string' && 
-               rider.name.length > 0 &&
-               typeof rider.position === 'number' &&
-               typeof rider.points === 'number' &&
-               typeof rider.category === 'string';
+        return rider &&
+            typeof rider.name === 'string' &&
+            rider.name.length > 0 &&
+            typeof rider.position === 'number' &&
+            typeof rider.points === 'number' &&
+            typeof rider.category === 'string';
     }
 
     /**
@@ -367,7 +368,7 @@ class RiderDataParser {
      */
     isTableHeader(row) {
         if (!row || row.length === 0) return false;
-        
+
         const rowText = row.join(' ').toLowerCase();
         return /position|name|points|rider/.test(rowText);
     }
@@ -379,10 +380,10 @@ class RiderDataParser {
      */
     isNewSection(row) {
         if (!row || row.length === 0) return false;
-        
+
         const rowText = row.join(' ').toLowerCase();
-        return /league|prime|sprint|table/.test(rowText) && 
-               row.filter(cell => cell.trim()).length <= 2;
+        return /league|prime|sprint|table/.test(rowText) &&
+            row.filter(cell => cell.trim()).length <= 2;
     }
 
     /**
