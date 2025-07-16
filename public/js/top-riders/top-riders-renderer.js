@@ -37,26 +37,32 @@ class TopRidersRenderer {
                 tablesContainer.appendChild(mlTable);
             }
 
-            // Render Development League table
+            // Render Development League table (only if data exists)
             if (topRidersData.developmentLeague && topRidersData.developmentLeague.length > 0) {
                 const dlTable = this.createLeagueTable(topRidersData.developmentLeague, 'Development League - Top 10');
                 tablesContainer.appendChild(dlTable);
             }
 
-            // Render Prime tables
+            // Render Prime tables (only if data exists)
+            let hasPrimeData = false;
             const primeContainer = this.createPrimeTablesContainer();
             
             if (topRidersData.prime1 && topRidersData.prime1.length > 0) {
                 const prime1Table = this.createPrimeTable(topRidersData.prime1, 'Prime Competition 1 - Top 5');
                 primeContainer.appendChild(prime1Table);
+                hasPrimeData = true;
             }
 
             if (topRidersData.prime2 && topRidersData.prime2.length > 0) {
                 const prime2Table = this.createPrimeTable(topRidersData.prime2, 'Prime Competition 2 - Top 5');
                 primeContainer.appendChild(prime2Table);
+                hasPrimeData = true;
             }
 
-            tablesContainer.appendChild(primeContainer);
+            // Only add prime container if there's actually prime data
+            if (hasPrimeData) {
+                tablesContainer.appendChild(primeContainer);
+            }
             container.appendChild(tablesContainer);
 
             // Add last updated info

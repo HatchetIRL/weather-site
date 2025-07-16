@@ -26,15 +26,19 @@ class RiderDataParser {
      */
     parseMainLeague(rawData) {
         try {
-            // Look for Main League or ML sheet/section
-            const mlData = this.findSheetSection(rawData, ['main league', 'ml', 'main']);
+            // Find the Main League sheet
+            const mainLeagueSheet = rawData.sheets.find(sheet => 
+                sheet.name === 'Main League' || sheet.name.toLowerCase().includes('main')
+            );
             
-            if (!mlData || mlData.length === 0) {
-                console.warn('No Main League data found');
+            if (!mainLeagueSheet || !mainLeagueSheet.data || mainLeagueSheet.data.length === 0) {
+                console.warn('No Main League sheet found');
                 return [];
             }
 
-            return this.parseRiderData(mlData, LEAGUE_CATEGORIES.MAIN_LEAGUE);
+            const riders = this.parseRiderData(mainLeagueSheet.data, LEAGUE_CATEGORIES.MAIN_LEAGUE);
+            
+            return riders;
         } catch (error) {
             console.error('Error parsing Main League data:', error);
             return [];
@@ -48,15 +52,19 @@ class RiderDataParser {
      */
     parseDevelopmentLeague(rawData) {
         try {
-            // Look for Development League or DL sheet/section
-            const dlData = this.findSheetSection(rawData, ['development league', 'dl', 'development', 'dev']);
+            // Find the Development League sheet
+            const devLeagueSheet = rawData.sheets.find(sheet => 
+                sheet.name === 'Dev League' || sheet.name.toLowerCase().includes('dev')
+            );
             
-            if (!dlData || dlData.length === 0) {
-                console.warn('No Development League data found');
+            if (!devLeagueSheet || !devLeagueSheet.data || devLeagueSheet.data.length === 0) {
+                console.warn('No Development League sheet found');
                 return [];
             }
 
-            return this.parseRiderData(dlData, LEAGUE_CATEGORIES.DEVELOPMENT_LEAGUE);
+            const riders = this.parseRiderData(devLeagueSheet.data, LEAGUE_CATEGORIES.DEVELOPMENT_LEAGUE);
+            
+            return riders;
         } catch (error) {
             console.error('Error parsing Development League data:', error);
             return [];
@@ -70,12 +78,34 @@ class RiderDataParser {
      */
     parsePrimeTables(rawData) {
         try {
-            const prime1Data = this.findSheetSection(rawData, ['prime 1', 'prime1', 'sprint 1']);
-            const prime2Data = this.findSheetSection(rawData, ['prime 2', 'prime2', 'sprint 2']);
+            // Find the ML Primes sheet (Prime 1)
+            const mlPrimesSheet = rawData.sheets.find(sheet => 
+                sheet.name === 'ML Primes' || sheet.name.toLowerCase().includes('ml prime')
+            );
+            
+            // Find the DL Primes sheet (Prime 2)
+            const dlPrimesSheet = rawData.sheets.find(sheet => 
+                sheet.name === 'DL Primes' || sheet.name.toLowerCase().includes('dl prime')
+            );
+
+            let prime1 = [];
+            let prime2 = [];
+
+            if (mlPrimesSheet && mlPrimesSheet.data && mlPrimesSheet.data.length > 0) {
+                prime1 = this.parseRiderData(mlPrimesSheet.data, LEAGUE_CATEGORIES.PRIME_1);
+            } else {
+                console.warn('No ML Primes sheet found');
+            }
+
+            if (dlPrimesSheet && dlPrimesSheet.data && dlPrimesSheet.data.length > 0) {
+                prime2 = this.parseRiderData(dlPrimesSheet.data, LEAGUE_CATEGORIES.PRIME_2);
+            } else {
+                console.warn('No DL Primes sheet found');
+            }
 
             return {
-                prime1: prime1Data ? this.parseRiderData(prime1Data, LEAGUE_CATEGORIES.PRIME_1) : [],
-                prime2: prime2Data ? this.parseRiderData(prime2Data, LEAGUE_CATEGORIES.PRIME_2) : []
+                prime1: prime1,
+                prime2: prime2
             };
         } catch (error) {
             console.error('Error parsing Prime tables data:', error);
@@ -201,6 +231,8 @@ class RiderDataParser {
     findColumnIndices(headerRow) {
         const indices = {
             position: -1,
+            firstName: -1,
+            lastName: -1,
             name: -1,
             points: -1,
             club: -1,
@@ -210,7 +242,16 @@ class RiderDataParser {
         for (let i = 0; i < headerRow.length; i++) {
             const header = headerRow[i].toLowerCase().trim();
             
-            if (this.columnPatterns.position.test(header)) {
+            // Handle the specific format of this sheet
+            if (header === 'first name') {
+                indices.firstName = i;
+            } else if (header === 'last name') {
+                indices.lastName = i;
+            } else if (header === 'total') {
+                indices.points = i;
+            } else if (header === 'ci club') {
+                indices.club = i;
+            } else if (this.columnPatterns.position.test(header)) {
                 indices.position = i;
             } else if (this.columnPatterns.name.test(header)) {
                 indices.name = i;
@@ -221,8 +262,10 @@ class RiderDataParser {
             }
         }
 
-        // At minimum, we need name and either position or points
-        indices.valid = indices.name >= 0 && (indices.position >= 0 || indices.points >= 0);
+        // For this format, we need firstName, lastName, and points
+        // OR we need a single name column and points
+        indices.valid = (indices.firstName >= 0 && indices.lastName >= 0 && indices.points >= 0) ||
+                       (indices.name >= 0 && indices.points >= 0);
         
         return indices;
     }
@@ -236,7 +279,17 @@ class RiderDataParser {
      */
     parseRiderRow(row, columnIndices, category) {
         try {
-            const name = columnIndices.name >= 0 ? row[columnIndices.name]?.trim() : '';
+            let name = '';
+            
+            // Handle firstName + lastName format
+            if (columnIndices.firstName >= 0 && columnIndices.lastName >= 0) {
+                const firstName = row[columnIndices.firstName]?.trim() || '';
+                const lastName = row[columnIndices.lastName]?.trim() || '';
+                name = `${firstName} ${lastName}`.trim();
+            } else if (columnIndices.name >= 0) {
+                name = row[columnIndices.name]?.trim() || '';
+            }
+            
             if (!name) {
                 return null;
             }

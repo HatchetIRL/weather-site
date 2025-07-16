@@ -18,20 +18,26 @@ class GoogleSheetsExtractor {
     }
 
     /**
-     * Extract data from Google Sheets using CSV export URL
+     * Extract data from Google Sheets using CSV export URL for multiple sheets
      * @param {string} sheetsUrl - Google Sheets URL
      * @returns {Promise<RawSheetData>}
      */
     async extractSheetData(sheetsUrl) {
         try {
-            // Convert Google Sheets URL to CSV export URL
-            const csvUrl = this.convertToCsvUrl(sheetsUrl);
+            // Extract spreadsheet ID from the URL
+            const spreadsheetId = this.extractSpreadsheetId(sheetsUrl);
             
-            if (!csvUrl) {
+            if (!spreadsheetId) {
                 throw new Error('Invalid Google Sheets URL');
             }
 
-            return await this.parseCSVData(csvUrl);
+            // Fetch data from all 4 sheets
+            const sheets = await this.fetchAllSheets(spreadsheetId);
+
+            return {
+                sheets: sheets,
+                extractedAt: new Date()
+            };
         } catch (error) {
             console.error('Failed to extract sheet data:', error);
             this.handleDataExtractionError(error);
@@ -181,6 +187,88 @@ class GoogleSheetsExtractor {
         });
 
         document.dispatchEvent(errorEvent);
+    }
+
+    /**
+     * Extract spreadsheet ID from Google Sheets URL
+     * @param {string} sheetsUrl - Google Sheets URL
+     * @returns {string|null} Spreadsheet ID or null if invalid
+     */
+    extractSpreadsheetId(sheetsUrl) {
+        try {
+            // Pattern for pubhtml URLs: /d/e/2PACX-...../pubhtml
+            const pubhtmlMatch = sheetsUrl.match(/\/d\/e\/([a-zA-Z0-9-_]+)\/pubhtml/);
+            if (pubhtmlMatch) {
+                return pubhtmlMatch[1];
+            }
+            
+            // Pattern for regular spreadsheet URLs: /d/spreadsheet_id/
+            const regularMatch = sheetsUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (regularMatch) {
+                return regularMatch[1];
+            }
+
+            // Pattern for short URLs: /d/spreadsheet_id
+            const shortMatch = sheetsUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (shortMatch) {
+                return shortMatch[1];
+            }
+
+            console.error('Could not extract spreadsheet ID from URL:', sheetsUrl);
+            return null;
+        } catch (error) {
+            console.error('Error extracting spreadsheet ID:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch data from all 4 sheets in the workbook
+     * @param {string} spreadsheetId - The spreadsheet ID
+     * @returns {Promise<Array>} Array of sheet data
+     */
+    async fetchAllSheets(spreadsheetId) {
+        const sheets = [];
+        
+        // Define the 4 sheets we need to fetch
+        const sheetConfigs = [
+            { name: 'Main League', gid: '2052107479' },
+            { name: 'ML Primes', gid: '394788670' },
+            { name: 'Dev League', gid: '732061928' },
+            { name: 'DL Primes', gid: '1028354950' }
+        ];
+
+        // Fetch each sheet individually
+        for (const config of sheetConfigs) {
+            try {
+                // Build CSV URL for specific sheet using gid parameter
+                const csvUrl = `https://docs.google.com/spreadsheets/d/e/${spreadsheetId}/pub?output=csv&gid=${config.gid}`;
+                
+                const response = await this.fetchWithTimeout(csvUrl);
+                
+                if (!response.ok) {
+                    console.warn(`Failed to fetch ${config.name}: HTTP ${response.status}`);
+                    continue;
+                }
+
+                const csvText = await response.text();
+                const parsedData = this.parseCSVText(csvText);
+                
+                sheets.push({
+                    name: config.name,
+                    data: parsedData
+                });
+            } catch (error) {
+                console.warn(`Error fetching ${config.name}:`, error);
+                // Continue with other sheets even if one fails
+            }
+        }
+
+        if (sheets.length === 0) {
+            throw new Error('Failed to fetch any sheet data');
+        }
+
+        return sheets;
     }
 
     /**
