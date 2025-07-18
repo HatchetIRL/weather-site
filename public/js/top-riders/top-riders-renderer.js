@@ -99,9 +99,12 @@ class TopRidersRenderer {
         const tbody = document.createElement('tbody');
         
         riders.forEach((rider, index) => {
+            const position = rider.position || (index + 1);
+            const isLeader = position === 1 || position === '1';
+            
             const row = this.createTableRow([
-                rider.position || (index + 1),
-                rider.name,
+                position,
+                isLeader ? this.createRiderWithJersey(rider.name, 'yellow') : rider.name,
                 rider.points,
                 rider.club || '-'
             ]);
@@ -132,9 +135,12 @@ class TopRidersRenderer {
         const tbody = document.createElement('tbody');
         
         riders.forEach((rider, index) => {
+            const rank = index + 1;
+            const isLeader = rank === 1;
+            
             const row = this.createTableRow([
-                index + 1, // Use index as rank for prime tables
-                rider.name,
+                rank,
+                isLeader ? this.createRiderWithJersey(rider.name, 'green') : rider.name,
                 rider.points
             ]);
             tbody.appendChild(row);
@@ -240,7 +246,7 @@ class TopRidersRenderer {
 
     /**
      * Create table row
-     * @param {(string|number)[]} cells - Array of cell values
+     * @param {(string|number|HTMLElement)[]} cells - Array of cell values
      * @returns {HTMLElement} Table row element
      */
     createTableRow(cells) {
@@ -248,7 +254,13 @@ class TopRidersRenderer {
         
         cells.forEach((cellValue, index) => {
             const td = document.createElement('td');
-            td.textContent = cellValue;
+            
+            // Handle HTML elements vs text content
+            if (cellValue instanceof HTMLElement) {
+                td.appendChild(cellValue);
+            } else {
+                td.textContent = cellValue;
+            }
             
             // Add data attributes for styling
             if (index === 0) {
@@ -265,6 +277,31 @@ class TopRidersRenderer {
         });
         
         return row;
+    }
+
+    /**
+     * Create rider name with jersey icon
+     * @param {string} riderName - Name of the rider
+     * @param {string} jerseyColor - Color of jersey ('yellow' or 'green')
+     * @returns {HTMLElement} Span element with jersey icon and rider name
+     */
+    createRiderWithJersey(riderName, jerseyColor) {
+        const container = document.createElement('span');
+        
+        // Create jersey icon
+        const jersey = document.createElement('span');
+        jersey.className = `jersey-icon ${jerseyColor}-jersey`;
+        jersey.setAttribute('aria-label', `${jerseyColor} jersey leader`);
+        jersey.setAttribute('title', `${jerseyColor === 'yellow' ? 'League' : 'Prime'} Leader`);
+        
+        // Add rider name
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = riderName;
+        
+        container.appendChild(jersey);
+        container.appendChild(nameSpan);
+        
+        return container;
     }
 
     /**
