@@ -60,6 +60,7 @@
   width: 100%;
   border-collapse: collapse;
   background: white;
+  table-layout: fixed; /* Force consistent column widths */
 }
 
 .top-riders-table th {
@@ -69,12 +70,18 @@
   text-align: center;
   font-weight: bold;
   border-bottom: 2px solid #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .top-riders-table td {
   padding: 10px 8px;
   border-bottom: 1px solid #ddd;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .top-riders-table tbody tr:nth-child(even) {
@@ -86,18 +93,48 @@
   transition: background-color 0.2s ease;
 }
 
-/* Position column styling */
+/* League Tables (4 columns: Position, Rider, Points, Club) */
+.top-riders-table th:first-child,
 .top-riders-table td:first-child {
+  width: 15%;
   font-weight: bold;
   text-align: center;
-  width: 60px;
 }
 
-/* Points column styling */
+.top-riders-table th:nth-child(2),
+.top-riders-table td:nth-child(2) {
+  width: 40%;
+  text-align: left;
+  padding-left: 12px;
+}
+
+.top-riders-table th:nth-child(3),
 .top-riders-table td:nth-child(3) {
+  width: 20%;
   font-weight: bold;
   text-align: center;
-  width: 80px;
+}
+
+.top-riders-table th:nth-child(4),
+.top-riders-table td:nth-child(4) {
+  width: 25%;
+  text-align: center;
+}
+
+/* Prime Tables (3 columns: Rank, Rider, Prime Points) - Override for 3-column tables */
+.prime-tables-container .top-riders-table th:first-child,
+.prime-tables-container .top-riders-table td:first-child {
+  width: 20%;
+}
+
+.prime-tables-container .top-riders-table th:nth-child(2),
+.prime-tables-container .top-riders-table td:nth-child(2) {
+  width: 50%;
+}
+
+.prime-tables-container .top-riders-table th:nth-child(3),
+.prime-tables-container .top-riders-table td:nth-child(3) {
+  width: 30%;
 }
 
 /* Loading State */
