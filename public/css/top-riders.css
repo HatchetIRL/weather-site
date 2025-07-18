@@ -282,7 +282,9 @@
 }
 
 .desktop-layout .prime-tables-container {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+  max-width: 800px;
+  margin: 20px auto 0;
 }
 
 /* Tablet Layout */
