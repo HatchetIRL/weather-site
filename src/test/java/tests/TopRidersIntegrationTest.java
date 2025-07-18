@@ -21,7 +21,7 @@ public class TopRidersIntegrationTest extends BaseTest {
     @Test
     @DisplayName("Complete Top Riders workflow should work end-to-end")
     public void testCompleteTopRidersWorkflow() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
 
         // Step 1: Verify container exists
@@ -74,7 +74,7 @@ public class TopRidersIntegrationTest extends BaseTest {
     @Test
     @DisplayName("Top Riders should not interfere with existing functionality")
     public void testNoInterferenceWithExistingFeatures() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
 
         // Verify existing iframe still works
@@ -85,10 +85,9 @@ public class TopRidersIntegrationTest extends BaseTest {
         assertTrue(iframeSrc.contains("docs.google.com"), 
             "❌ Iframe source not pointing to Google Sheets");
 
-        // Verify logout button still works
-        WebElement logoutBtn = driver.findElement(By.id("logoutBtn"));
-        assertTrue(logoutBtn.isDisplayed(), "❌ Logout button not visible");
-        assertTrue(logoutBtn.isEnabled(), "❌ Logout button not enabled");
+        // Verify no logout button is present (login functionality removed)
+        List<WebElement> logoutBtns = driver.findElements(By.id("logoutBtn"));
+        assertTrue(logoutBtns.isEmpty(), "❌ Logout button should not be present");
 
         // Verify page title is correct
         String title = driver.getTitle();
@@ -105,7 +104,7 @@ public class TopRidersIntegrationTest extends BaseTest {
     @Test
     @DisplayName("Top Riders should handle page refresh correctly")
     public void testPageRefreshHandling() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
 
         // Wait for initial load
@@ -134,7 +133,7 @@ public class TopRidersIntegrationTest extends BaseTest {
     @DisplayName("Both public and views pages should have Top Riders functionality")
     public void testBothPagesHaveTopRiders() {
         // Test is already running on one of the pages, so we know at least one works
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         assertTrue(standingsPage.isTopRidersContainerPresent(), 
             "❌ Top Riders container not present on current page");
@@ -154,7 +153,7 @@ public class TopRidersIntegrationTest extends BaseTest {
     @Test
     @DisplayName("Top Riders should be accessible")
     public void testAccessibility() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
 
         WebElement container = driver.findElement(By.id("top-riders-container"));

@@ -18,7 +18,7 @@ public class TopRidersTest extends BaseTest {
     @Test
     @DisplayName("Top Riders container should be present on standings page")
     public void testTopRidersContainerExists() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         
@@ -32,7 +32,7 @@ public class TopRidersTest extends BaseTest {
     @Test
     @DisplayName("Top Riders section should load content or show loading/error state")
     public void testTopRidersContentLoads() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         
@@ -58,7 +58,7 @@ public class TopRidersTest extends BaseTest {
     @Test
     @DisplayName("Top Riders CSS should be loaded")
     public void testTopRidersCSSLoaded() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         
@@ -80,7 +80,7 @@ public class TopRidersTest extends BaseTest {
     @Test
     @DisplayName("Top Riders JavaScript modules should load without critical errors")
     public void testTopRidersJavaScriptLoads() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         
@@ -121,7 +121,7 @@ public class TopRidersTest extends BaseTest {
     @Test
     @DisplayName("Top Riders should handle data loading gracefully")
     public void testTopRidersDataHandling() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         
@@ -166,7 +166,7 @@ public class TopRidersTest extends BaseTest {
     @Test
     @DisplayName("Top Riders should be positioned correctly on page")
     public void testTopRidersPositioning() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         
@@ -191,7 +191,7 @@ public class TopRidersTest extends BaseTest {
     @Test
     @DisplayName("Top Riders should be responsive on mobile viewport")
     public void testTopRidersResponsive() {
-        StandingsPage standingsPage = loginAndGoToStandingsPage();
+        StandingsPage standingsPage = goToStandingsPage();
         
         assertTrue(standingsPage.isAtStandingsPage(), "❌ Not on the standings page.");
         

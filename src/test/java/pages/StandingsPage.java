@@ -14,8 +14,7 @@ public class StandingsPage extends BasePage{
     @FindBy(id = "sheets-viewport")
     private WebElement standingsTbl;
 
-    @FindBy(id = "logoutBtn")
-    private WebElement btnLogOut;
+
 
 
     public StandingsPage(WebDriver driver) {
@@ -44,10 +43,7 @@ public class StandingsPage extends BasePage{
         return score;
     }
 
-    public void clickLogout(){
-        wait.until(ExpectedConditions.visibilityOf(btnLogOut));
-        btnLogOut.click();
-    }
+
 
     // Top Riders functionality methods
     public boolean isTopRidersContainerPresent() {
